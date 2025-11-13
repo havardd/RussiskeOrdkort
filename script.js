@@ -57,6 +57,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Legg til event listeners for tale-knappene på kortet
+  const btnSpeakRu = document.getElementById('btnSpeakRu');
+  const btnSpeakNo = document.getElementById('btnSpeakNo');
+  const ruEl = document.getElementById('ru');
+  const norskFrontEl = document.getElementById('norskFront');
+  if (btnSpeakRu && ruEl) {
+    btnSpeakRu.addEventListener('click', function(e) {
+      e.stopPropagation();
+      speakWord(ruEl.textContent, 'ru');
+    });
+  }
+  if (btnSpeakNo && norskFrontEl) {
+    btnSpeakNo.addEventListener('click', function(e) {
+      e.stopPropagation();
+      speakWord(norskFrontEl.textContent, 'no');
+    });
+  }
 });
 
 ;(async function() {
@@ -316,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    function speakWord(text, lang, cb) {
+    window.speakWord = function(text, lang, cb) {
       if (!window.speechSynthesis || !text) { cb && cb(); return; }
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = lang === 'ru' ? 'ru-RU' : 'nb-NO';
