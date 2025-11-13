@@ -43,25 +43,29 @@
 
   <div>
   <nav class="controlbar" aria-label="Hurtigkontroller">
-    <button id="btnFlip" class="btn primary" type="button" aria-label="Vis eller skjul oversettelser">Vis / Skjul</button>
-    <button id="btnNew" class="btn success" type="button" aria-label="Vis nytt ord">Nytt ord</button>
-    <button id="btnSpeak" class="btn" type="button" aria-label="Spill av uttale">🔊 Les opp</button>
-  <select id="voiceSelect" class="voice" aria-label="Velg russisk stemme"></select>
-  <select id="voiceSelectNo" class="voice" aria-label="Velg norsk stemme"></select>
-    <label class="toggle" for="autoSpeak"><input id="autoSpeak" type="checkbox" role="switch" aria-checked="false" /> Auto-opplesning</label>
-    <button id="btnEditor" class="btn" type="button" aria-label="Åpne editor">✏️ Rediger</button>
-    <label class="toggle" for="shuffleWords"><input id="shuffleWords" type="checkbox" role="switch" aria-checked="false" /> Bland ord og tall</label>
-    <div class="settings-menu" aria-label="Innstillinger">
-      <button id="settingsToggle" class="btn" type="button" aria-label="Åpne innstillinger">⚙️ Innstillinger</button>
-      <div id="settingsPanel" class="settings-panel" hidden>
-        <div class="toggle" role="group" aria-label="Tema">
-          <button id="themeSystem" class="btn" type="button" aria-pressed="true" title="Følg system">System</button>
-          <button id="themeLight" class="btn" type="button" aria-pressed="false" title="Lyst">Lyst</button>
-          <button id="themeDark" class="btn" type="button" aria-pressed="false" title="Mørkt">Mørkt</button>
-        </div>
-        <button id="btnClearCache" class="btn" type="button" aria-label="Slett cache og last nyeste">🗑️ Slett cache</button>
+  <button id="btnSpeak" class="btn" type="button" aria-label="Spill av uttale">🔊 Les opp</button>
+  <!-- Removed 'Bland ord og tall' from controlbar -->
+  <div class="settings-menu" aria-label="Innstillinger">
+    <button id="settingsToggle" class="btn" type="button" aria-label="Åpne innstillinger">⚙️ Innstillinger</button>
+    <div id="settingsPanel" class="settings-panel" hidden>
+      <div class="toggle" role="group" aria-label="Tema">
+        <button id="themeSystem" class="btn" type="button" aria-pressed="true" title="Følg system">System</button>
+        <button id="themeLight" class="btn" type="button" aria-pressed="false" title="Lyst">Lyst</button>
+        <button id="themeDark" class="btn" type="button" aria-pressed="false" title="Mørkt">Mørkt</button>
       </div>
+      <hr />
+      <label class="toggle" for="autoSpeak"><input id="autoSpeak" type="checkbox" role="switch" aria-checked="false" /> Auto-opplesning</label>
+      <div class="voice-selectors">
+        <label for="voiceSelect">Russisk stemme:</label>
+        <select id="voiceSelect" class="voice" aria-label="Velg russisk stemme"></select>
+        <label for="voiceSelectNo">Norsk stemme:</label>
+        <select id="voiceSelectNo" class="voice" aria-label="Velg norsk stemme"></select>
+      </div>
+      <button id="btnEditor" class="btn" type="button" aria-label="Åpne editor">✏️ Rediger</button>
+      <button id="btnClearCache" class="btn" type="button" aria-label="Slett cache og last nyeste">🗑️ Slett cache</button>
+  <label class="toggle" for="shuffleWords"><input id="shuffleWords" type="checkbox" role="switch" aria-checked="false" /> Bland ord og tall</label>
     </div>
+  </div>
   </nav>
 
   <dialog id="editor">
