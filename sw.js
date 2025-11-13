@@ -1,7 +1,7 @@
 // Simple offline cache for Ordkort
 const CACHE_NAME = 'ordkort-cache-v1';
 const ASSETS = [
-  './russisk_ordkort_v4_pwa.html',
+  './index.html',
   './ordkort-manifest.webmanifest',
   './ordkort-icon-192.png',
   './ordkort-icon-512.png'
