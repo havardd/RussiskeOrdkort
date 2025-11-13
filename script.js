@@ -325,15 +325,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (studyModeBox) {
       studyModeBox.addEventListener('change', function() {
-        studyModeActive = studyModeBox.checked;
-        if (studyModeActive) {
-          studyCurrentRepeat = 0;
-          studyCurrentIndex = 0;
-          startStudyMode();
-        } else {
-          stopStudyMode();
-        }
+        setStudyMode(studyModeBox.checked);
       });
+    }
+
+    // Synkroniser knapp og checkbox
+    const studyModeBtn = document.getElementById('studyModeBtn');
+    const studyModeBtnIcon = document.getElementById('studyModeBtnIcon');
+    function updateStudyModeBtn() {
+      if (studyModeActive) {
+        studyModeBtnIcon.textContent = '⏹️';
+        studyModeBtn.setAttribute('aria-label', 'Stopp studiemodus');
+      } else {
+        studyModeBtnIcon.textContent = '▶️';
+        studyModeBtn.setAttribute('aria-label', 'Start studiemodus');
+      }
+    }
+    function setStudyMode(active) {
+      studyModeActive = !!active;
+      if (studyModeBox) studyModeBox.checked = studyModeActive;
+      updateStudyModeBtn();
+      if (studyModeActive) {
+        studyCurrentRepeat = 0;
+        studyCurrentIndex = 0;
+        startStudyMode();
+      } else {
+        stopStudyMode();
+      }
+    }
+
+    if (studyModeBtn) {
+      studyModeBtn.addEventListener('click', function() {
+        setStudyMode(!studyModeActive);
+      });
+      updateStudyModeBtn();
     }
 
     function startStudyMode() {
@@ -358,28 +383,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playStudyWord(w, repeat) {
+      if (!studyModeActive) return;
       if (repeat >= studyRepeatCount) {
         studyCurrentIndex++;
         if (studyCurrentIndex >= WORDS.length) {
           studyCurrentIndex = 0; // Start på nytt
         }
-        studyTimer = setTimeout(showStudyWord, studyDelay * 1000); // pause før neste ord
+        studyTimer = setTimeout(function() {
+          if (studyModeActive) showStudyWord();
+        }, studyDelay * 1000);
         return;
       }
       const readFirst = localStorage.getItem('ordkort:readFirst') || 'ru';
       if (readFirst === 'ru') {
         speakWord(w.ru, 'ru', function() {
+          if (!studyModeActive) return;
           speakWord(w.no, 'no', function() {
+            if (!studyModeActive) return;
             studyTimer = setTimeout(function() {
-              playStudyWord(w, repeat + 1);
+              if (studyModeActive) playStudyWord(w, repeat + 1);
             }, studyDelay * 1000);
           });
         });
       } else {
         speakWord(w.no, 'no', function() {
+          if (!studyModeActive) return;
           speakWord(w.ru, 'ru', function() {
+            if (!studyModeActive) return;
             studyTimer = setTimeout(function() {
-              playStudyWord(w, repeat + 1);
+              if (studyModeActive) playStudyWord(w, repeat + 1);
             }, studyDelay * 1000);
           });
         });
@@ -573,11 +605,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Klikk for å snu kortet
     card.addEventListener('click', function() {
       card.classList.toggle('flipped');
-      // Oppdater aria-pressed og aria-hidden for tilgjengelighet
+      // Oppdater aria-pressed og inert for tilgjengelighet
       const isFlipped = card.classList.contains('flipped');
       card.setAttribute('aria-pressed', isFlipped ? 'true' : 'false');
-      document.getElementById('back').setAttribute('aria-hidden', isFlipped ? 'false' : 'true');
-      document.getElementById('front').setAttribute('aria-hidden', isFlipped ? 'true' : 'false');
+      document.getElementById('back').toggleAttribute('inert', !isFlipped);
+      document.getElementById('front').toggleAttribute('inert', isFlipped);
     });
   }
 
