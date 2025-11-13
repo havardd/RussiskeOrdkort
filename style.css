@@ -1,3 +1,28 @@
+/* Midtstill studiemodusknapp i footeren */
+.study-mode-btn-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.7em;
+}
+.study-mode-btn {
+  background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+  border: none;
+  border-radius: 50%;
+  width: 2.7em;
+  height: 2.7em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(14,165,233,0.12);
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 0;
+  font-size: 1.5em;
+}
+.study-mode-btn:hover {
+  background: linear-gradient(90deg, #38bdf8 0%, #0ea5e9 100%);
+}
 /* Knapper for å lese kortet høyt */
 .card-speak-btns {
   display: flex;
