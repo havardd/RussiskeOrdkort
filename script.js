@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
         speakWord(w.no, 'no', function() {
           speakWord(w.ru, 'ru', function() {
             studyTimer = setTimeout(function() {
-              playStudyWord(w, repeat + 1);
+              playStudyWord(w, repeat + 3);
             }, 800);
           });
         });
