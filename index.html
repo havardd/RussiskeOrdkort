@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Russisk ordkort – v4 PWA + Editor</title>
+  <title>Russisk ordkort – Lær deg språket</title>
   <meta name="description" content="Moderne, mobilvennlig ordkort med lyd, sveip, temaer, PWA/offline, editor og CSV/JSON-import.">
   <link rel="manifest" href="ordkort-manifest.webmanifest">
   <meta name="theme-color" content="#0ea5e9">
@@ -39,8 +39,8 @@
         <div class="card-face face-back" id="back" aria-hidden="true">
           <img id="imgBack" class="card-img card-img-back" src="" alt="" />
           <div class="back-grid">
-            <div><span class="label">Russisk</span><div class="value" id="no">—</div></div>
-            <div><span class="label">Norsk</span><div class="value" id="en">—</div></div>
+            <div><span class="label">Norsk</span><div class="value" id="no">—</div></div>
+            <div><span class="label">Engelsk</span><div class="value" id="en">—</div></div>
           </div>
           <div class="help">Trykk igjen for å gå tilbake.</div>
         </div>
@@ -53,7 +53,15 @@
           <span id="studyModeBtnIcon">▶️</span>
         </button>
       </div>
-      <p>Tastatursnarveier: <kbd>N</kbd> nytt ord · <kbd>T</kbd> flip · <kbd>P</kbd> spill av · <kbd>L/M/S</kbd> tema</p>
+      <p class="footer-shortcuts">Tastatursnarveier
+        <br> 
+        · <kbd>pil høyre/venstre</kbd> nytt ord
+        <br> 
+        · <kbd>⬆pil opp/ned⬇</kbd> flip 
+        <br>
+        · <kbd>Studiemodus</kbd> Mellomrom 
+        <br>
+        · <kbd>Les opp</kbd> Enter</p>
     </footer>
   </div>
 
