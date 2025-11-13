@@ -1,3 +1,80 @@
+  // ...eksisterende kode...
+
+  // Etter setCard:
+  // NB: wordIndex skal kun deklareres én gang her!
+  // Fjernet duplikat, behold kun én deklarasjon etter setCard
+  function showPrevCard() {
+    const arr = LANGUAGES[currentLanguage] || [];
+    if (!arr.length) return;
+    wordIndex = (wordIndex - 1 + arr.length) % arr.length;
+    setCard(arr[wordIndex]);
+  }
+  function showNextCard() {
+    const arr = LANGUAGES[currentLanguage] || [];
+    if (!arr.length) return;
+    wordIndex = (wordIndex + 1) % arr.length;
+    setCard(arr[wordIndex]);
+  }
+  let wordIndex = 0;
+  // ...eksisterende kode...
+
+  // Flytt tastaturlisten hit, etter setCard er definert
+  document.addEventListener('keydown', function(e) {
+    // Ignorer hvis input, textarea eller dialog har fokus
+    const tag = document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement.isContentEditable) return;
+
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      // Bla i ordlisten, samme som sveip
+      const arr = LANGUAGES[currentLanguage] || [];
+      if (!arr.length) return;
+      if (e.key === 'ArrowRight') {
+        wordIndex = (wordIndex + 1) % arr.length;
+      } else {
+        wordIndex = (wordIndex - 1 + arr.length) % arr.length;
+      }
+      setCard(arr[wordIndex]);
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      // Vis baksiden
+      const card = document.getElementById('card');
+      if (card && !card.classList.contains('flipped')) card.classList.add('flipped');
+      e.preventDefault();
+    } else if (e.key === 'ArrowDown') {
+      // Vis forsiden
+      const card = document.getElementById('card');
+      if (card && card.classList.contains('flipped')) card.classList.remove('flipped');
+      e.preventDefault();
+    } else if (e.key === ' ') {
+      // Space: Start/stopp studiemodus
+      const studyModeBtn = document.getElementById('studyModeBtn');
+      if (studyModeBtn) studyModeBtn.click();
+      e.preventDefault();
+    } else if (e.key === 'Enter') {
+      // Enter: Les opp ordene på gjeldende side
+      const card = document.getElementById('card');
+      if (card && card.classList.contains('flipped')) {
+        // Baksiden
+        const ru = document.getElementById('no');
+        const no = document.getElementById('en');
+        if (ru && no) {
+          speakWord(ru.textContent, 'ru', function() {
+            speakWord(no.textContent, 'no');
+          });
+        }
+      } else {
+        // Forsiden
+        const ru = document.getElementById('ru');
+        const no = document.getElementById('norskFront');
+        if (ru && no) {
+          speakWord(ru.textContent, 'ru', function() {
+            speakWord(no.textContent, 'no');
+          });
+        }
+      }
+      e.preventDefault();
+    }
+  });
   // RENDER TABLE: Oppdaterer editor-tabellen og ordlisten
   function renderTable() {
     const tbody = document.getElementById('tableBody');
@@ -568,38 +645,51 @@ document.addEventListener('DOMContentLoaded', () => {
   const card = document.getElementById('card');
   let touchStartX = null;
   let touchEndX = null;
+  let touchStartY = null;
+  let touchEndY = null;
   let wordIndex = 0;
   if (card) {
     card.addEventListener('touchstart', function(e) {
       if (e.touches.length === 1) {
         touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
       }
     });
     card.addEventListener('touchend', function(e) {
-      if (touchStartX !== null && e.changedTouches.length === 1) {
+      if (touchStartX !== null && touchStartY !== null && e.changedTouches.length === 1) {
         touchEndX = e.changedTouches[0].clientX;
+        touchEndY = e.changedTouches[0].clientY;
         const dx = touchEndX - touchStartX;
+        const dy = touchEndY - touchStartY;
         const shuffleBox = document.getElementById('shuffleWords');
-        if (Math.abs(dx) > 40) {
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+          // Horisontal sveip: bla i ordlisten
           if (shuffleBox && !shuffleBox.checked) {
-            // Sveip venstre/høyre for forrige/neste ord i valgt ordliste
             const arr = LANGUAGES[currentLanguage] || [];
             if (!arr.length) return;
             if (dx > 0) {
-              // Sveip høyre: neste ord
               wordIndex = (wordIndex + 1) % arr.length;
             } else {
-              // Sveip venstre: forrige ord
               wordIndex = (wordIndex - 1 + arr.length) % arr.length;
             }
             setCard(arr[wordIndex]);
           } else {
-            // Standard: nytt ord
             newWord();
+          }
+        } else if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 40) {
+          // Vertikal sveip: snu kortet
+          if (dy < 0) {
+            // Sveip opp: vis baksiden
+            if (!card.classList.contains('flipped')) card.classList.add('flipped');
+          } else {
+            // Sveip ned: vis forsiden
+            if (card.classList.contains('flipped')) card.classList.remove('flipped');
           }
         }
         touchStartX = null;
         touchEndX = null;
+        touchStartY = null;
+        touchEndY = null;
       }
     });
     // Klikk for å snu kortet
