@@ -149,8 +149,6 @@ import { WORDS_ALFABET } from './alfabet.js';
   card.addEventListener("touchstart", e=>{ const t=e.changedTouches[0]; startX=t.clientX; startY=t.clientY; }, {passive:true});
   card.addEventListener("touchend", e=>{ const t=e.changedTouches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY; const isSwipe=Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy); if(isSwipe) newWord(); else toggleFlip(); }, {passive:true});
   card.addEventListener("click", toggleFlip);
-  btnFlip.addEventListener("click", toggleFlip);
-  btnNew.addEventListener("click", newWord);
 
   window.addEventListener("keydown", (e)=>{
     const tag=(e.target&&e.target.tagName)||"";
