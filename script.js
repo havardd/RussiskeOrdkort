@@ -11,9 +11,10 @@
   function setCard(w){
     ru.textContent = w.ru || '—';
     pron.textContent = "uttale: " + (w.pron || '—');
+    // Norsk oversettelse på forsiden skal alltid oppdateres
+    if (norskFront) norskFront.textContent = w.no || '—';
     // Hvis alfabet-språk, vis spesialfelt og bilder
     if (currentLanguage === 'alfabet') {
-      norskFront.textContent = w.no || '—';
       noEl.textContent = w.word ? (w.word + (w.pron ? ' [' + w.pron + ']': '')) : '—';
       enEl.textContent = (w.word_no || '—') + (w.number ? ' | Tall: ' + w.number : '');
       // Vis bilder hvis de finnes
