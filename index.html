@@ -51,11 +51,20 @@
     <!-- Removed 'Bland ord og tall' from controlbar -->
   </nav>
   <div id="settingsPanel" class="settings-panel" hidden>
+      <div class="settings-group settings-language modern-ordliste" role="group" aria-label="Ordliste">
+        <label for="languageSelect" class="settings-title">Ordliste:</label>
+        <select id="languageSelect" class="language-select">
+          <option value="russisk">Russisk</option>
+          <option value="html">HTML</option>
+          <option value="tall">Russiske tall</option>
+          <option value="alfabet">Russisk alfabet</option>
+        </select>
+      </div>
       <hr />
       <div class="settings-group settings-readfirst" role="radiogroup" aria-label="Les først">
-  <span class="settings-title">Les først:</span>
-  <label class="readfirst-radio" title="Russisk"><input type="radio" name="readFirst" id="readFirstRu" value="ru" checked><img src="img/language/russia.png" alt="Russisk" class="flag-icon"></label>
-  <label class="readfirst-radio" title="Norsk"><input type="radio" name="readFirst" id="readFirstNo" value="no"><img src="img/language/norway.png" alt="Norsk" class="flag-icon"></label>
+        <span class="settings-title">Les først:</span>
+        <label class="readfirst-radio" title="Russisk"><input type="radio" name="readFirst" id="readFirstRu" value="ru" checked><img src="img/language/russia.png" alt="Russisk" class="flag-icon"></label>
+        <label class="readfirst-radio" title="Norsk"><input type="radio" name="readFirst" id="readFirstNo" value="no"><img src="img/language/norway.png" alt="Norsk" class="flag-icon"></label>
       </div>
       <div class="settings-group settings-func" role="group" aria-label="Funksjoner">
         <label class="toggle" for="studyMode"><input id="studyMode" type="checkbox" role="switch" aria-checked="false" /> Studiemodus</label>
@@ -80,15 +89,6 @@
         <label class="theme-radio" title="System"><input type="radio" name="theme" id="themeSystem" value="system"><span>📱</span></label>
         <label class="theme-radio" title="Lyst"><input type="radio" name="theme" id="themeLight" value="light"><span>◻️</span></label>
         <label class="theme-radio" title="Mørkt"><input type="radio" name="theme" id="themeDark" value="dark" checked><span>◼️</span></label>
-      </div>
-      <div class="settings-group settings-language" role="group" aria-label="Ordliste">
-        <label for="languageSelect" class="settings-title">Ordliste:</label>
-        <select id="languageSelect" class="language-select">
-          <option value="russisk">Russisk</option>
-          <option value="html">HTML</option>
-          <option value="tall">Russiske tall</option>
-          <option value="alfabet">Russisk alfabet</option>
-        </select>
       </div>
     </div>
   </div>

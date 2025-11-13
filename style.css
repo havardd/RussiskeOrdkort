@@ -1,3 +1,36 @@
+/* Moderne Ordliste-stil */
+.settings-group.settings-language.modern-ordliste {
+  background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+  color: #fff;
+  border-radius: 1em;
+  padding: 1em 1.2em;
+  box-shadow: 0 2px 8px rgba(14,165,233,0.12);
+  margin-bottom: 0.5em;
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+.settings-group.settings-language.modern-ordliste .settings-title {
+  font-size: 1.15em;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  margin-right: 1em;
+}
+.settings-group.settings-language.modern-ordliste .language-select {
+  background: #fff;
+  color: #0ea5e9;
+  border: none;
+  border-radius: 0.5em;
+  padding: 0.4em 1em;
+  font-size: 1em;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(14,165,233,0.08);
+  transition: box-shadow 0.2s;
+}
+.settings-group.settings-language.modern-ordliste .language-select:focus {
+  outline: 2px solid #38bdf8;
+  box-shadow: 0 2px 8px rgba(56,189,248,0.18);
+}
 .card-img-front, .card-img-back {
   display: none;
   max-width: 100%;
