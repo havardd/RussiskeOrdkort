@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Russisk ordkort – v4 PWA + Editor</title>
+  <meta name="description" content="Moderne, mobilvennlig ordkort med lyd, sveip, temaer, PWA/offline, editor og CSV/JSON-import.">
+  <link rel="manifest" href="ordkort-manifest.webmanifest">
+  <meta name="theme-color" content="#0ea5e9">
+  <link rel="apple-touch-icon" href="ordkort-icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Russisk ordkort</h1>
+      <p>Moderne design + PWA/offline. Sveip for nytt ord, trykk for oversettelse. Lyd med stemmevalg. Innebygd editor, import/eksport.</p>
+      <div id="live" aria-live="polite" class="sr-only"></div>
+    </header>
+
+    <section aria-label="Ordkort" class="card-scene">
+      <div id="card" class="card" role="button" tabindex="0" aria-pressed="false" aria-describedby="helpText">
+        <div class="card-face face-front" id="front">
+          <div class="ru" id="ru">—</div>
+          <div class="pron" id="pron">—</div>
+          <div class="norsk-front" id="norskFront">—</div>
+          <div class="help" id="helpText">Trykk kortet for å vise oversettelser. Sveip venstre/høyre for nytt ord.</div>
+        </div>
+        <div class="card-face face-back" id="back" aria-hidden="true">
+          <div class="back-grid">
+            <div><span class="label">Russisk</span><div class="value" id="no">—</div></div>
+            <div><span class="label">Norsk</span><div class="value" id="en">—</div></div>
+          </div>
+          <div class="help">Trykk igjen for å gå tilbake.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>Tastatursnarveier: <kbd>N</kbd> nytt ord · <kbd>T</kbd> flip · <kbd>P</kbd> spill av · <kbd>L/M/S</kbd> tema</p>
+    </footer>
+  </div>
+
+  <div>
+  <nav class="controlbar" aria-label="Hurtigkontroller">
+    <button id="btnFlip" class="btn primary" type="button" aria-label="Vis eller skjul oversettelser">Vis / Skjul</button>
+    <button id="btnNew" class="btn success" type="button" aria-label="Vis nytt ord">Nytt ord</button>
+    <button id="btnSpeak" class="btn" type="button" aria-label="Spill av uttale">🔊 Les opp</button>
+  <select id="voiceSelect" class="voice" aria-label="Velg russisk stemme"></select>
+  <select id="voiceSelectNo" class="voice" aria-label="Velg norsk stemme"></select>
+    <label class="toggle" for="autoSpeak"><input id="autoSpeak" type="checkbox" role="switch" aria-checked="false" /> Auto-opplesning</label>
+    <button id="btnEditor" class="btn" type="button" aria-label="Åpne editor">✏️ Rediger</button>
+    <label class="toggle" for="shuffleWords"><input id="shuffleWords" type="checkbox" role="switch" aria-checked="false" /> Bland ord og tall</label>
+    <div class="settings-menu" aria-label="Innstillinger">
+      <button id="settingsToggle" class="btn" type="button" aria-label="Åpne innstillinger">⚙️ Innstillinger</button>
+      <div id="settingsPanel" class="settings-panel" hidden>
+        <div class="toggle" role="group" aria-label="Tema">
+          <button id="themeSystem" class="btn" type="button" aria-pressed="true" title="Følg system">System</button>
+          <button id="themeLight" class="btn" type="button" aria-pressed="false" title="Lyst">Lyst</button>
+          <button id="themeDark" class="btn" type="button" aria-pressed="false" title="Mørkt">Mørkt</button>
+        </div>
+        <button id="btnClearCache" class="btn" type="button" aria-label="Slett cache og last nyeste">🗑️ Slett cache</button>
+      </div>
+    </div>
+  </nav>
+
+  <dialog id="editor">
+    <div class="editor-wrap">
+      <div class="editor-head">
+        <h2>Ordliste-editor</h2>
+        <div class="editor-actions">
+          <button id="addRow" class="btn">➕ Ny rad</button>
+          <button id="importJSON" class="btn">📥 Import JSON</button>
+          <button id="importCSV" class="btn">📥 Import CSV</button>
+          <input type="file" id="filePicker" accept=".json,.csv,text/csv,application/json" style="display:none" />
+          <button id="exportJSON" class="btn">📤 Eksport JSON</button>
+          <button id="exportCSV" class="btn">📤 Eksport CSV</button>
+          <button id="loadLocal" class="btn">📦 Last fra lokal lagring</button>
+          <button id="resetDefaults" class="btn">↩️ Tilbakestill til standard</button>
+          <button id="saveLocal" class="btn success">💾 Lagre til lokal lagring</button>
+        </div>
+      </div>
+      <div class="editor-body">
+        <table class="words" aria-label="Ordliste">
+          <thead>
+            <tr><th>Russisk (ru)</th><th>Uttale (pron)</th><th>Norsk (no)</th><th>Engelsk (en)</th><th>Handling</th></tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="editor-foot">
+        <button id="closeEditor" class="btn close-btn">Lukk</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="module" src="script.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(console.error);
+        });
+      }
+    </script>
+</body>
+</html>
