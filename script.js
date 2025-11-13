@@ -1,3 +1,33 @@
+  // RENDER TABLE: Oppdaterer editor-tabellen og ordlisten
+  function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    WORDS.forEach((w, i) => {
+      const tr = document.createElement('tr');
+      ['ru', 'pron', 'no', 'en'].forEach(key => {
+        const td = document.createElement('td');
+        td.contentEditable = true;
+        td.textContent = w[key] || '';
+        td.addEventListener('input', e => {
+          WORDS[i][key] = td.textContent;
+        });
+        tr.appendChild(td);
+      });
+      // Handling: Slett rad
+      const tdAction = document.createElement('td');
+      const btnDel = document.createElement('button');
+      btnDel.textContent = '🗑️';
+      btnDel.className = 'btn';
+      btnDel.addEventListener('click', () => {
+        WORDS.splice(i, 1);
+        renderTable();
+      });
+      tdAction.appendChild(btnDel);
+      tr.appendChild(tdAction);
+      tbody.appendChild(tr);
+    });
+  }
 // (Flyttet til DOMContentLoaded)
   // Slett cache og last inn nyeste versjon
   document.getElementById('btnClearCache').addEventListener('click', async function() {
@@ -37,6 +67,14 @@ async function loadLanguageData() {
 
 // Wait for language data before starting app logic
 document.addEventListener('DOMContentLoaded', () => {
+    // Lukk editoren når Lukk-knappen trykkes
+    const closeEditorBtn = document.getElementById('closeEditor');
+    const editorDialog = document.getElementById('editor');
+    if (closeEditorBtn && editorDialog) {
+      closeEditorBtn.addEventListener('click', () => {
+        editorDialog.close();
+      });
+    }
   const settingsToggle = document.getElementById('settingsToggle');
   const settingsPanel = document.getElementById('settingsPanel');
   if (!settingsToggle) console.error('Fant ikke settingsToggle!');
