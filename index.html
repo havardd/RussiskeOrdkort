@@ -74,12 +74,18 @@
         <label class="readfirst-radio" title="Russisk"><input type="radio" name="readFirst" id="readFirstRu" value="ru" checked><img src="img/language/russia.png" alt="Russisk" class="flag-icon"></label>
         <label class="readfirst-radio" title="Norsk"><input type="radio" name="readFirst" id="readFirstNo" value="no"><img src="img/language/norway.png" alt="Norsk" class="flag-icon"></label>
       </div>
+      <div class="settings-group settings-voice" role="group" aria-label="Talevalg">
+        <label class="toggle" for="autoSpeak"><input id="autoSpeak" type="checkbox" role="switch" aria-checked="false" /> Auto-opplesning</label>
+      </div>
       <div class="settings-group settings-func" role="group" aria-label="Funksjoner">
         <label class="toggle" for="studyMode"><input id="studyMode" type="checkbox" role="switch" aria-checked="false" /> Studiemodus</label>
         <label class="toggle" for="shuffleWords"><input id="shuffleWords" type="checkbox" role="switch" aria-checked="false" /> Bland ord og tall</label>
-      </div>
-      <div class="settings-group settings-voice" role="group" aria-label="Talevalg">
-        <label class="toggle" for="autoSpeak"><input id="autoSpeak" type="checkbox" role="switch" aria-checked="false" /> Auto-opplesning</label>
+        <label class="toggle" for="studyDelay">Pause mellom språk:
+          <input id="studyDelay" type="number" min="0" max="10" step="0.1" value="0.8" style="width:4em;" /> sekunder
+        </label>
+        <label class="toggle" for="studyRepeatCount">Repetisjoner per ord:
+          <input id="studyRepeatCount" type="number" min="1" max="10" step="1" value="3" style="width:3em;" />
+        </label>
         <div class="voice-selectors">
           <label for="voiceSelect" class="voice-label">Russisk stemme:</label>
           <select id="voiceSelect" class="voice" aria-label="Velg russisk stemme"></select>

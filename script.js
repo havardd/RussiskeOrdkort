@@ -264,11 +264,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // ...existing code...
     // Studiemodus-innstilling
     const studyModeBox = document.getElementById('studyMode');
+    const studyDelayInput = document.getElementById('studyDelay');
+    const studyRepeatInput = document.getElementById('studyRepeatCount');
     let studyModeActive = false;
-    let studyRepeatCount = 3;
+    let studyRepeatCount = studyRepeatInput ? parseInt(studyRepeatInput.value, 10) : 3;
+    let studyDelay = studyDelayInput ? parseFloat(studyDelayInput.value) : 0.8;
     let studyCurrentRepeat = 0;
     let studyCurrentIndex = 0;
     let studyTimer = null;
+
+    // Oppdater verdier ved endring
+    if (studyRepeatInput) {
+      studyRepeatInput.addEventListener('input', function() {
+        studyRepeatCount = parseInt(this.value, 10) || 1;
+      });
+    }
+    if (studyDelayInput) {
+      studyDelayInput.addEventListener('input', function() {
+        studyDelay = parseFloat(this.value) || 0.8;
+      });
+    }
 
     if (studyModeBox) {
       studyModeBox.addEventListener('change', function() {
@@ -301,7 +316,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!WORDS.length) return;
       const w = WORDS[studyCurrentIndex];
       setCard(w);
-      // Spill av norsk og russisk tre ganger
       playStudyWord(w, 0);
     }
 
@@ -311,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (studyCurrentIndex >= WORDS.length) {
           studyCurrentIndex = 0; // Start på nytt
         }
-        studyTimer = setTimeout(showStudyWord, 800); // pause før neste ord
+        studyTimer = setTimeout(showStudyWord, studyDelay * 1000); // pause før neste ord
         return;
       }
       const readFirst = localStorage.getItem('ordkort:readFirst') || 'ru';
@@ -320,15 +334,15 @@ document.addEventListener('DOMContentLoaded', () => {
           speakWord(w.no, 'no', function() {
             studyTimer = setTimeout(function() {
               playStudyWord(w, repeat + 1);
-            }, 800);
+            }, studyDelay * 1000);
           });
         });
       } else {
         speakWord(w.no, 'no', function() {
           speakWord(w.ru, 'ru', function() {
             studyTimer = setTimeout(function() {
-              playStudyWord(w, repeat + 3);
-            }, 800);
+              playStudyWord(w, repeat + 1);
+            }, studyDelay * 1000);
           });
         });
       }
