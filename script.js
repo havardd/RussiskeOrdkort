@@ -1,16 +1,4 @@
-  // Innstillinger-meny toggle
-  const settingsToggle = document.getElementById('settingsToggle');
-  const settingsPanel = document.getElementById('settingsPanel');
-  if (settingsToggle && settingsPanel) {
-    settingsToggle.addEventListener('click', () => {
-      const isOpen = !settingsPanel.hasAttribute('hidden');
-      if (isOpen) {
-        settingsPanel.setAttribute('hidden', '');
-      } else {
-        settingsPanel.removeAttribute('hidden');
-      }
-    });
-  }
+// (Flyttet til DOMContentLoaded)
   // Slett cache og last inn nyeste versjon
   document.getElementById('btnClearCache').addEventListener('click', async function() {
     if ('caches' in window) {
@@ -21,26 +9,200 @@
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map(r => r.unregister()));
     }
-    // Tøm localStorage hvis ønskelig (valgfritt)
-    // localStorage.clear();
+      // Tøm localStorage
+      localStorage.clear();
     location.reload(true);
   });
 // --- App JS fra russisk_ordkort_v4_pwa.html ---
-import { WORDS_RU } from './russisk.js';
-import { WORDS_HTML } from './html.js';
-import { WORDS_TALL } from './tall.js';
-import { WORDS_ALFABET } from './alfabet.js';
-(function(){
-  // Service worker registration will be handled in HTML.
+// Dynamically load language data from JSON files
+const LANGUAGES = {};
+let currentLanguage = 'russisk';
 
-  // Språkvalg
-  const LANGUAGES = {
-    russisk: WORDS_RU,
-    html: WORDS_HTML,
-    tall: WORDS_TALL,
-    alfabet: WORDS_ALFABET
+async function loadLanguageData() {
+  const files = {
+    russisk: 'russisk.json',
+    html: 'html.json',
+    tall: 'tall.json',
+    alfabet: 'alfabet.json'
   };
-  let currentLanguage = 'russisk';
+  return Promise.all(Object.entries(files).map(async ([key, file]) => {
+    try {
+      const res = await fetch(file);
+      LANGUAGES[key] = await res.json();
+    } catch (e) {
+      LANGUAGES[key] = [];
+    }
+  }));
+}
+
+// Wait for language data before starting app logic
+document.addEventListener('DOMContentLoaded', () => {
+  const settingsToggle = document.getElementById('settingsToggle');
+  const settingsPanel = document.getElementById('settingsPanel');
+  if (!settingsToggle) console.error('Fant ikke settingsToggle!');
+  if (!settingsPanel) console.error('Fant ikke settingsPanel!');
+  if (settingsToggle && settingsPanel) {
+    settingsPanel.setAttribute('hidden', '');
+    settingsToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (settingsPanel.hasAttribute('hidden')) {
+        settingsPanel.removeAttribute('hidden');
+      } else {
+        settingsPanel.setAttribute('hidden', '');
+      }
+    });
+    document.addEventListener('click', function(e) {
+      if (!settingsPanel.hasAttribute('hidden') && !settingsPanel.contains(e.target) && e.target !== settingsToggle) {
+        settingsPanel.setAttribute('hidden', '');
+      }
+    });
+  }
+});
+
+;(async function() {
+  // Skjul controlbar som standard
+  const controlbar = document.querySelector('.controlbar');
+  if (controlbar) controlbar.setAttribute('hidden', '');
+
+  // --- TEMA ---
+  // Sett mørkt som standard
+  document.documentElement.setAttribute('data-theme', 'dark');
+  // Tema-knapper
+  const themeSystem = document.getElementById('themeSystem');
+  const themeLight = document.getElementById('themeLight');
+  const themeDark = document.getElementById('themeDark');
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('ordkort:theme', theme);
+    // Oppdater radioknappene
+    themeSystem.checked = theme === 'system';
+    themeLight.checked = theme === 'light';
+    themeDark.checked = theme === 'dark';
+  }
+  [themeSystem, themeLight, themeDark].forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      if (radio.checked) setTheme(radio.value);
+    });
+  });
+  // Last valgt tema, ellers mørkt som standard
+  const savedTheme = localStorage.getItem('ordkort:theme');
+  if (savedTheme) {
+    setTheme(savedTheme);
+  } else {
+    setTheme('dark');
+  }
+
+  // --- TALESYNTESE ---
+  // Vis labels og nedtrekk
+  const voiceSelect = document.getElementById('voiceSelect');
+  const voiceSelectNo = document.getElementById('voiceSelectNo');
+  function populateVoices() {
+    const voices = window.speechSynthesis.getVoices();
+    voiceSelect.innerHTML = '';
+    voiceSelectNo.innerHTML = '';
+    voices.forEach(v => {
+      if (v.lang.startsWith('ru')) {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = v.name + ' (' + v.lang + ')';
+        voiceSelect.appendChild(opt);
+      }
+      if (v.lang.startsWith('nb') || v.lang.startsWith('no')) {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = v.name + ' (' + v.lang + ')';
+        voiceSelectNo.appendChild(opt);
+      }
+    });
+  }
+  if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = populateVoices;
+    populateVoices();
+  }
+
+  // --- REDIGER-KNAPP ---
+  const btnEditor = document.getElementById('btnEditor');
+  const editor = document.getElementById('editor');
+  if (btnEditor && editor) {
+    btnEditor.addEventListener('click', () => {
+      editor.showModal();
+    });
+  }
+
+  // --- LES OPP-KNAPP ---
+  const btnSpeak = document.getElementById('btnSpeak');
+  btnSpeak.addEventListener('click', () => {
+    const w = WORDS && WORDS.length ? WORDS[Math.floor(Math.random() * WORDS.length)] : null;
+    if (!w) return;
+    const readFirst = localStorage.getItem('ordkort:readFirst') || 'ru';
+    if (readFirst === 'ru') {
+      speakWord(w.ru, 'ru', () => speakWord(w.no, 'no'));
+    } else {
+      speakWord(w.no, 'no', () => speakWord(w.ru, 'ru'));
+    }
+  });
+
+  // --- ORDLISTE-BYTTE ---
+  const languageSelect = document.getElementById('languageSelect');
+  if (languageSelect) {
+    languageSelect.addEventListener('change', function() {
+      window.setLanguage(this.value);
+    });
+  }
+  await loadLanguageData();
+  // Definer alle DOM-elementer én gang
+  const norskFront = document.getElementById('norskFront');
+  const imgFront = document.getElementById('imgFront');
+  const imgBack = document.getElementById('imgBack');
+  const noEl = document.getElementById('no');
+  const enEl = document.getElementById('en');
+  const ru = document.getElementById('ru');
+  const pron = document.getElementById('pron');
+  function setCard(w){
+    ru.textContent = w.ru || '—';
+    pron.textContent = "uttale: " + (w.pron || '—');
+    // Hvis alfabet-språk, vis spesialfelt og bilder
+    if (currentLanguage === 'alfabet') {
+      norskFront.textContent = w.no || '—';
+      noEl.textContent = w.word ? (w.word + (w.pron ? ' [' + w.pron + ']': '')) : '—';
+      enEl.textContent = (w.word_no || '—') + (w.number ? ' | Tall: ' + w.number : '');
+      // Vis bilder hvis de finnes
+      if (w.img_front) {
+        imgFront.src = w.img_front;
+        imgFront.alt = w.word || '';
+        imgFront.style.display = '';
+      } else {
+        imgFront.src = '';
+        imgFront.style.display = 'none';
+      }
+      if (w.img_back) {
+        imgBack.src = w.img_back;
+        imgBack.alt = w.word_no || '';
+        imgBack.style.display = '';
+      } else {
+        imgBack.src = '';
+        imgBack.style.display = 'none';
+      }
+    } else {
+      norskFront.textContent = w.no || '—';
+      noEl.textContent = w.no || '—';
+      enEl.textContent = '';
+      // Skjul bilder for andre språk
+      if (imgFront) imgFront.style.display = 'none';
+      if (imgBack) imgBack.style.display = 'none';
+    }
+    // Auto-opplesning
+    const autoSpeak = document.getElementById('autoSpeak');
+    if (autoSpeak && autoSpeak.checked) {
+      const readFirst = localStorage.getItem('ordkort:readFirst') || 'ru';
+      if (readFirst === 'ru') {
+        speakWord(w.ru, 'ru', () => speakWord(w.no, 'no'));
+      } else {
+        speakWord(w.no, 'no', () => speakWord(w.ru, 'ru'));
+      }
+    }
+  }
+  // Service worker registration will be handled in HTML.
 
   function getDefaultWords() {
     let arr = LANGUAGES[currentLanguage] || [];
@@ -61,210 +223,122 @@ import { WORDS_ALFABET } from './alfabet.js';
   try { WORDS = JSON.parse(localStorage.getItem(STORAGE_WORDS) || '[]'); } catch(e){ WORDS = []; }
   if (!Array.isArray(WORDS) || WORDS.length === 0) WORDS = getDefaultWords().slice();
 
-  // DOM elements
-  const card = document.getElementById("card");
-  const ru = document.getElementById("ru");
-  const pron = document.getElementById("pron");
-  const noEl = document.getElementById("no");
-  const enEl = document.getElementById("en");
-  const btnFlip = document.getElementById("btnFlip");
-  const btnNew = document.getElementById("btnNew");
-  const btnSpeak = document.getElementById("btnSpeak");
-  const voiceSelect = document.getElementById("voiceSelect");
-  const btnSystem = document.getElementById("themeSystem");
-  const btnLight  = document.getElementById("themeLight");
-  const btnDark   = document.getElementById("themeDark");
-  const chkAuto = document.getElementById("autoSpeak");
-  const btnEditor = document.getElementById("btnEditor");
-
-  let lastIndex = -1, flipped = false;
-  let orderedIndex = 0;
-
-  function pickIndex(first = false){
-    const shuffleBox = document.getElementById('shuffleWords');
-    const arr = (shuffleBox && shuffleBox.checked) ? shuffledWords : WORDS;
-    if (!arr.length) return -1;
-    if (shuffleBox && shuffleBox.checked) {
-      // Shuffle: tilfeldig
-      let i = Math.floor(Math.random() * arr.length);
-      if (arr.length > 1 && i === lastIndex) i = (i + 1) % arr.length;
-      return i;
-    } else {
-      // Ikke shuffle: sekvensiell
-      if (first) {
-        return 0;
-      } else {
-        orderedIndex = (orderedIndex + 1) % arr.length;
-        return orderedIndex;
-      }
+    // --- LES FØRST PÅ ---
+    const readFirstRu = document.getElementById('readFirstRu');
+    const readFirstNo = document.getElementById('readFirstNo');
+    function setReadFirst(lang) {
+      localStorage.setItem('ordkort:readFirst', lang);
+      readFirstRu.checked = lang === 'ru';
+      readFirstNo.checked = lang === 'no';
     }
-  }
-  function setCard(w){
-    ru.textContent = w.ru || '—';
-    pron.textContent = "uttale: " + (w.pron || '—');
-    var norskFront = document.getElementById('norskFront');
-    // Hvis alfabet-språk, vis spesialfelt
-    if (currentLanguage === 'alfabet') {
-      // Forside: bokstav og norsk kobling
-      norskFront.textContent = w.no || '—';
-      // Bakside: eksempelord, norsk oversettelse, uttale, tall
-      noEl.textContent = w.word ? (w.word + (w.pron ? ' [' + w.pron + ']': '')) : '—';
-      enEl.textContent = (w.word_no || '—') + (w.number ? ' | Tall: ' + w.number : '');
-    } else {
-      // Standard visning
-      norskFront.textContent = w.no || '—';
-      noEl.textContent = w.no || '—';
-      enEl.textContent = '';
-    }
-  }
-  function setFlipped(v){ flipped=v; card.classList.toggle("is-flipped", flipped); card.setAttribute("aria-pressed", String(flipped)); }
-  function toggleFlip(){
-    setFlipped(!flipped);
-    if (lastIndex >= 0 && WORDS[lastIndex]) setCard(WORDS[lastIndex]);
-  }
-  function newWord(first = false){
-    const shuffleBox = document.getElementById('shuffleWords');
-    const arr = LANGUAGES[currentLanguage] || [];
-    if (shuffleBox && shuffleBox.checked) {
-      // Bland ord kun i shuffledWords
-      shuffledWords = arr.slice();
-      for (let i = shuffledWords.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledWords[i], shuffledWords[j]] = [shuffledWords[j], shuffledWords[i]];
-      }
-    } else {
-      WORDS = arr.slice();
-      if (first) orderedIndex = 0;
-    }
-    const i = pickIndex(first);
-    if (i < 0) return;
-    const useArr = (shuffleBox && shuffleBox.checked) ? shuffledWords : WORDS;
-    lastIndex = i;
-    setCard(useArr[i]);
-    setFlipped(false);
-    if (chkAuto && chkAuto.checked) speak();
-  }
-
-  let startX=0,startY=0;
-  card.addEventListener("touchstart", e=>{ const t=e.changedTouches[0]; startX=t.clientX; startY=t.clientY; }, {passive:true});
-  card.addEventListener("touchend", e=>{ const t=e.changedTouches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY; const isSwipe=Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy); if(isSwipe) newWord(); else toggleFlip(); }, {passive:true});
-  card.addEventListener("click", toggleFlip);
-
-  window.addEventListener("keydown", (e)=>{
-    const tag=(e.target&&e.target.tagName)||"";
-    if(["INPUT","TEXTAREA","SELECT"].includes(tag)) return;
-    // Enter for nytt ord
-    if(e.key === "Enter") { newWord(); e.preventDefault(); return; }
-    // Space for flip
-    if(e.code === "Space" || e.key === " ") { toggleFlip(); e.preventDefault(); return; }
-    // Venstre Shift for les opp
-    if(e.key === "Shift" && e.location === 1) { speak(); e.preventDefault(); return; }
-    // Tema
-    const k=(e.key||"").toLowerCase();
-    if(k==="l") setTheme("light");
-    if(k==="m") setTheme("dark");
-    if(k==="s") setTheme("system");
-  });
-
-  const STORAGE_THEME="ordkort:theme";
-  function setTheme(mode){ const html=document.documentElement; if (mode==="system") html.removeAttribute("data-theme"); else html.setAttribute("data-theme", mode);
-    btnSystem.setAttribute("aria-pressed", String(mode==="system")); btnLight.setAttribute("aria-pressed", String(mode==="light")); btnDark.setAttribute("aria-pressed", String(mode==="dark"));
-    try{ localStorage.setItem(STORAGE_THEME, mode); }catch(e){} }
-  (function initTheme(){ let mode="dark"; try{ mode=localStorage.getItem(STORAGE_THEME)||"dark"; }catch(e){} setTheme(mode); })();
-  btnSystem.addEventListener("click", ()=> setTheme("system"));
-  btnLight.addEventListener("click",  ()=> setTheme("light"));
-  btnDark.addEventListener("click",   ()=> setTheme("dark"));
-
-  const synth = window.speechSynthesis;
-  const STORAGE_VOICE = "ordkort:voice";
-  let voices = [];
-  function populateVoices(){
-    if (!('speechSynthesis' in window)) { voiceSelect.innerHTML = "<option>Opplesning ikke støttet</option>"; return; }
-    voices = synth.getVoices() || [];
-    // Russisk stemmer
-    const ruVoices = voices.filter(v => (v.lang||"").toLowerCase().startsWith("ru"));
-    const listRu = ruVoices.length ? ruVoices : voices;
-    voiceSelect.innerHTML = "";
-    listRu.forEach(v => { const opt=document.createElement("option"); opt.value=v.name; opt.textContent=(v.lang?`[${v.lang}] `:"")+v.name; voiceSelect.appendChild(opt); });
-    let savedRu=null; try{ savedRu=localStorage.getItem(STORAGE_VOICE); }catch(e){}
-    if (savedRu && Array.from(voiceSelect.options).some(o=>o.value===savedRu)) voiceSelect.value=savedRu;
-    else if (ruVoices.length) voiceSelect.value=ruVoices[0].name;
-
-    // Norsk stemmer
-    const noVoices = voices.filter(v => (v.lang||"").toLowerCase().startsWith("no"));
-    const listNo = noVoices.length ? noVoices : voices.filter(v => (v.lang||"").toLowerCase().includes("no"));
-    const voiceSelectNo = document.getElementById("voiceSelectNo");
-    voiceSelectNo.innerHTML = "";
-    listNo.forEach(v => { const opt=document.createElement("option"); opt.value=v.name; opt.textContent=(v.lang?`[${v.lang}] `:"")+v.name; voiceSelectNo.appendChild(opt); });
-    let savedNo=null; try{ savedNo=localStorage.getItem("ordkort:voiceNo"); }catch(e){}
-    if (savedNo && Array.from(voiceSelectNo.options).some(o=>o.value===savedNo)) voiceSelectNo.value=savedNo;
-    else if (listNo.length) voiceSelectNo.value=listNo[0].name;
-  }
-  if (typeof speechSynthesis!=="undefined") speechSynthesis.onvoiceschanged = populateVoices;
-  populateVoices();
-  function speak(){
-    if (!('speechSynthesis' in window)) { alert("Opplesning støttes ikke i denne nettleseren."); return; }
-    synth.cancel();
-    // Russisk først
-    const uRu = new SpeechSynthesisUtterance(ru.textContent);
-    uRu.lang = "ru-RU"; uRu.rate = 0.95; uRu.pitch = 1.0;
-    const chosenRu = voiceSelect.value; const vRu=(voices||[]).find(v=>v.name===chosenRu); if (vRu) uRu.voice = vRu;
-    synth.speak(uRu);
-    // Norsk etter 2 sekunder
-    setTimeout(() => {
-      const uNo = new SpeechSynthesisUtterance(noEl.textContent);
-      uNo.lang = "no-NO"; uNo.rate = 1.0; uNo.pitch = 1.0;
-      const voiceSelectNo = document.getElementById("voiceSelectNo");
-      const chosenNo = voiceSelectNo.value; const vNo=(voices||[]).find(v=>v.name===chosenNo); if (vNo) uNo.voice = vNo;
-      synth.speak(uNo);
-    }, 2000);
-  }
-  btnSpeak.addEventListener("click", speak);
-  voiceSelect.addEventListener("change", ()=>{ try{ localStorage.setItem(STORAGE_VOICE, voiceSelect.value); }catch(e){} });
-  document.getElementById("voiceSelectNo").addEventListener("change", ()=>{ try{ localStorage.setItem("ordkort:voiceNo", document.getElementById("voiceSelectNo").value); }catch(e){} });
-
-  (function initAuto(){ let saved="true"; try{ saved=localStorage.getItem("ordkort:auto")||"true"; }catch(e){} const on=(saved==="true"); const chk=document.getElementById("autoSpeak"); chk.checked=on; chk.setAttribute("aria-checked", String(on)); })();
-  document.getElementById("autoSpeak").addEventListener("change", (e)=>{ const on=e.target.checked; e.target.setAttribute("aria-checked", String(on)); try{ localStorage.setItem("ordkort:auto", String(on)); }catch(e){} });
-
-  const editor = document.getElementById("editor");
-  const tableBody = document.getElementById("tableBody");
-  const addRowBtn = document.getElementById("addRow");
-  const filePicker = document.getElementById("filePicker");
-  const importJSONBtn = document.getElementById("importJSON");
-  const importCSVBtn = document.getElementById("importCSV");
-  const exportJSONBtn = document.getElementById("exportJSON");
-  const exportCSVBtn = document.getElementById("exportCSV");
-  const loadLocalBtn = document.getElementById("loadLocal");
-  const resetDefaultsBtn = document.getElementById("resetDefaults");
-  const saveLocalBtn = document.getElementById("saveLocal");
-  const closeEditorBtn = document.getElementById("closeEditor");
-
-  function openEditor(){ renderTable(); if (typeof editor.showModal === "function") editor.showModal(); else editor.setAttribute("open",""); }
-  function closeEditor(){ if (typeof editor.close === "function") editor.close(); else editor.removeAttribute("open"); }
-  btnEditor.addEventListener("click", openEditor);
-  closeEditorBtn.addEventListener("click", closeEditor);
-
-  function renderTable(){
-    tableBody.innerHTML = "";
-    WORDS.forEach((w, idx) => {
-      const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><input data-idx="${idx}" data-key="ru"   value="${w.ru || ""}"></td>
-          <td><input data-idx="${idx}" data-key="pron" value="${w.pron || ""}"></td>
-          <td><input data-idx="${idx}" data-key="no"   value="${w.no || ""}"></td>
-          <td><input data-idx="${idx}" data-key="en"   value="${w.en || ""}"></td>
-          <td class="row-actions"><button data-action="del" data-idx="${idx}">Slett</button></td>
-        `;
-      tableBody.appendChild(tr);
+    [readFirstRu, readFirstNo].forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.checked) setReadFirst(radio.value);
+      });
     });
+    // Last valgt språk, ellers russisk som standard
+    const savedReadFirst = localStorage.getItem('ordkort:readFirst');
+    if (savedReadFirst) {
+      setReadFirst(savedReadFirst);
+    } else {
+      setReadFirst('ru');
+    }
+  // ...existing code...
+    // Studiemodus-innstilling
+    const studyModeBox = document.getElementById('studyMode');
+    let studyModeActive = false;
+    let studyRepeatCount = 3;
+    let studyCurrentRepeat = 0;
+    let studyCurrentIndex = 0;
+    let studyTimer = null;
+
+    if (studyModeBox) {
+      studyModeBox.addEventListener('change', function() {
+        studyModeActive = studyModeBox.checked;
+        if (studyModeActive) {
+          studyCurrentRepeat = 0;
+          studyCurrentIndex = 0;
+          startStudyMode();
+        } else {
+          stopStudyMode();
+        }
+      });
+    }
+
+    function startStudyMode() {
+      if (!WORDS.length) return;
+      studyCurrentRepeat = 0;
+      studyCurrentIndex = 0;
+      showStudyWord();
+    }
+
+    function stopStudyMode() {
+      if (studyTimer) {
+        clearTimeout(studyTimer);
+        studyTimer = null;
+      }
+    }
+
+    function showStudyWord() {
+      if (!WORDS.length) return;
+      const w = WORDS[studyCurrentIndex];
+      setCard(w);
+      // Spill av norsk og russisk tre ganger
+      playStudyWord(w, 0);
+    }
+
+    function playStudyWord(w, repeat) {
+      if (repeat >= studyRepeatCount) {
+        studyCurrentIndex++;
+        if (studyCurrentIndex >= WORDS.length) {
+          studyCurrentIndex = 0; // Start på nytt
+        }
+        studyTimer = setTimeout(showStudyWord, 800); // pause før neste ord
+        return;
+      }
+      const readFirst = localStorage.getItem('ordkort:readFirst') || 'ru';
+      if (readFirst === 'ru') {
+        speakWord(w.ru, 'ru', function() {
+          speakWord(w.no, 'no', function() {
+            studyTimer = setTimeout(function() {
+              playStudyWord(w, repeat + 1);
+            }, 800);
+          });
+        });
+      } else {
+        speakWord(w.no, 'no', function() {
+          speakWord(w.ru, 'ru', function() {
+            studyTimer = setTimeout(function() {
+              playStudyWord(w, repeat + 1);
+            }, 800);
+          });
+        });
+      }
+    }
+
+    function speakWord(text, lang, cb) {
+      if (!window.speechSynthesis || !text) { cb && cb(); return; }
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = lang === 'ru' ? 'ru-RU' : 'nb-NO';
+      utter.onend = function() { cb && cb(); };
+      window.speechSynthesis.speak(utter);
+    }
+  // Definer addRowBtn før bruk
+  const addRowBtn = document.getElementById('addRow');
+  if (addRowBtn) {
+    addRowBtn.addEventListener("click", ()=>{ WORDS.push({ru:"", pron:"", no:"", en:""}); renderTable(); });
   }
 
-  tableBody.addEventListener("input", (e)=>{ const t=e.target; if (t.tagName!=="INPUT") return; const idx=+t.getAttribute("data-idx"); const key=t.getAttribute("data-key"); if (!WORDS[idx]) return; WORDS[idx][key]=t.value; });
-  tableBody.addEventListener("click", (e)=>{ const btn=e.target.closest("button[data-action='del']"); if (!btn) return; const idx=+btn.getAttribute("data-idx"); WORDS.splice(idx,1); renderTable(); });
-  addRowBtn.addEventListener("click", ()=>{ WORDS.push({ru:"", pron:"", no:"", en:""}); renderTable(); });
-
-  importJSONBtn.addEventListener("click", ()=>{ filePicker.accept=".json,application/json"; filePicker.click(); filePicker.onchange=()=> handleFile("json"); });
-  importCSVBtn.addEventListener("click", ()=>{ filePicker.accept=".csv,text/csv"; filePicker.click(); filePicker.onchange=()=> handleFile("csv"); });
+  // Definer importJSONBtn og importCSVBtn før bruk
+  const importJSONBtn = document.getElementById('importJSON');
+  const importCSVBtn = document.getElementById('importCSV');
+  const filePicker = document.getElementById('filePicker');
+  if (importJSONBtn && filePicker) {
+    importJSONBtn.addEventListener("click", ()=>{ filePicker.accept=".json,application/json"; filePicker.click(); filePicker.onchange=()=> handleFile("json"); });
+  }
+  if (importCSVBtn && filePicker) {
+    importCSVBtn.addEventListener("click", ()=>{ filePicker.accept=".csv,text/csv"; filePicker.click(); filePicker.onchange=()=> handleFile("csv"); });
+  }
 
   function handleFile(kind){
     const f = filePicker.files && filePicker.files[0];
@@ -301,8 +375,15 @@ import { WORDS_ALFABET } from './alfabet.js';
   function take(cols, i){ return (i>=0 && i<cols.length) ? cols[i] : ""; }
   function splitCSVLine(line){ const res=[], re=/\s*(?:"([^"]*)"|([^,]*))\s*(?:,|$)/g; let m; while ((m=re.exec(line))){ res.push(m[1]!==undefined?m[1]:m[2]); } return res; }
 
-  exportJSONBtn.addEventListener("click", ()=> downloadFile("ordliste.json", JSON.stringify(WORDS, null, 2)));
-  exportCSVBtn.addEventListener("click", ()=> downloadFile("ordliste.csv", toCSV(WORDS)));
+  // Definer exportJSONBtn og exportCSVBtn før bruk
+  const exportJSONBtn = document.getElementById('exportJSON');
+  const exportCSVBtn = document.getElementById('exportCSV');
+  if (exportJSONBtn) {
+    exportJSONBtn.addEventListener("click", ()=> downloadFile("ordliste.json", JSON.stringify(WORDS, null, 2)));
+  }
+  if (exportCSVBtn) {
+    exportCSVBtn.addEventListener("click", ()=> downloadFile("ordliste.csv", toCSV(WORDS)));
+  }
   function toCSV(arr){ const head=["ru","pron","no","en"]; const rows=[head.join(",")]; arr.forEach(o=>rows.push(head.map(k=>csvEscape(o[k]||"")).join(","))); return rows.join("\n"); }
   function csvEscape(v){ const s=String(v).replace(/"/g,'""'); return /[",\n]/.test(s) ? '"' + s + '"' : s; }
   function downloadFile(name, content){ const blob=new Blob([content], {type: "text/plain;charset=utf-8"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
@@ -315,8 +396,24 @@ import { WORDS_ALFABET } from './alfabet.js';
     try{ localStorage.setItem(STORAGE_WORDS, JSON.stringify(WORDS)); alert("Lagret til lokal lagring."); }catch(e){ alert("Kunne ikke lagre."); }
   });
 
+  // Definer funksjonen newWord
+  function newWord(force) {
+    // Velg neste ord og oppdater kortet
+    let arr = WORDS;
+    if (!arr || !arr.length) arr = getDefaultWords();
+    let idx = Math.floor(Math.random() * arr.length);
+    setCard(arr[idx]);
+  }
   editor.addEventListener("close", ()=>{ newWord(); });
   newWord(true);
+  // Overstyr newWord hvis Studiemodus er aktiv
+  function newWordStudyOverride() {
+    if (studyModeActive) {
+      showStudyWord();
+      return;
+    }
+    newWord();
+  }
 
   // Eksempel på språkbytte (legg til en enkel språkvelger hvis ønsket)
   window.setLanguage = function(lang) {
@@ -346,20 +443,55 @@ import { WORDS_ALFABET } from './alfabet.js';
     });
   }
 
-  // Legg til visuell språkvelger
-  const languageSelect = document.createElement('select');
-  languageSelect.id = 'languageSelect';
-  languageSelect.style.margin = '0 1em 0 0';
-  languageSelect.style.fontSize = '1em';
-  languageSelect.style.borderRadius = '8px';
-  languageSelect.style.padding = '0.5em 1em';
-  languageSelect.style.border = '1px solid var(--border)';
-  languageSelect.setAttribute('aria-label', 'Velg språk');
-  languageSelect.innerHTML = '<option value="russisk">Russisk</option><option value="html">HTML</option><option value="tall">Russiske tall</option><option value="alfabet">Russisk alfabet</option>';
-  const controlbar = document.querySelector('.controlbar');
-  if (controlbar) controlbar.insertBefore(languageSelect, controlbar.firstChild);
-  languageSelect.addEventListener('change', function() {
-    window.setLanguage(this.value);
-  });
+  // --- SVEIP ---
+  const card = document.getElementById('card');
+  let touchStartX = null;
+  let touchEndX = null;
+  let wordIndex = 0;
+  if (card) {
+    card.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+      }
+    });
+    card.addEventListener('touchend', function(e) {
+      if (touchStartX !== null && e.changedTouches.length === 1) {
+        touchEndX = e.changedTouches[0].clientX;
+        const dx = touchEndX - touchStartX;
+        const shuffleBox = document.getElementById('shuffleWords');
+        if (Math.abs(dx) > 40) {
+          if (shuffleBox && !shuffleBox.checked) {
+            // Sveip venstre/høyre for forrige/neste ord i valgt ordliste
+            const arr = LANGUAGES[currentLanguage] || [];
+            if (!arr.length) return;
+            if (dx > 0) {
+              // Sveip høyre: neste ord
+              wordIndex = (wordIndex + 1) % arr.length;
+            } else {
+              // Sveip venstre: forrige ord
+              wordIndex = (wordIndex - 1 + arr.length) % arr.length;
+            }
+            setCard(arr[wordIndex]);
+          } else {
+            // Standard: nytt ord
+            newWord();
+          }
+        }
+        touchStartX = null;
+        touchEndX = null;
+      }
+    });
+    // Klikk for å snu kortet
+    card.addEventListener('click', function() {
+      card.classList.toggle('flipped');
+      // Oppdater aria-pressed og aria-hidden for tilgjengelighet
+      const isFlipped = card.classList.contains('flipped');
+      card.setAttribute('aria-pressed', isFlipped ? 'true' : 'false');
+      document.getElementById('back').setAttribute('aria-hidden', isFlipped ? 'false' : 'true');
+      document.getElementById('front').setAttribute('aria-hidden', isFlipped ? 'true' : 'false');
+    });
+  }
+
+  // ...eksisterende kode...
 
 })();

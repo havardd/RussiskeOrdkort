@@ -25,6 +25,6 @@ self.addEventListener('fetch', (e) => {
       const copy = res.clone();
       caches.open(CACHE_NAME).then(c => c.put(req, copy));
       return res;
-    }).catch(() => caches.match('./russisk_ordkort_v4_pwa.html')))
+    }).catch(() => caches.match('./index.html')))
   );
 });

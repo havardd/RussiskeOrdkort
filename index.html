@@ -8,6 +8,7 @@
   <link rel="manifest" href="ordkort-manifest.webmanifest">
   <meta name="theme-color" content="#0ea5e9">
   <link rel="apple-touch-icon" href="ordkort-icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,12 +22,14 @@
     <section aria-label="Ordkort" class="card-scene">
       <div id="card" class="card" role="button" tabindex="0" aria-pressed="false" aria-describedby="helpText">
         <div class="card-face face-front" id="front">
+          <img id="imgFront" class="card-img card-img-front" src="" alt="" />
           <div class="ru" id="ru">—</div>
           <div class="pron" id="pron">—</div>
           <div class="norsk-front" id="norskFront">—</div>
           <div class="help" id="helpText">Trykk kortet for å vise oversettelser. Sveip venstre/høyre for nytt ord.</div>
         </div>
         <div class="card-face face-back" id="back" aria-hidden="true">
+          <img id="imgBack" class="card-img card-img-back" src="" alt="" />
           <div class="back-grid">
             <div><span class="label">Russisk</span><div class="value" id="no">—</div></div>
             <div><span class="label">Norsk</span><div class="value" id="en">—</div></div>
@@ -42,28 +45,51 @@
   </div>
 
   <div>
-  <nav class="controlbar" aria-label="Hurtigkontroller">
-  <button id="btnSpeak" class="btn" type="button" aria-label="Spill av uttale">🔊 Les opp</button>
-  <!-- Removed 'Bland ord og tall' from controlbar -->
-  <div class="settings-menu" aria-label="Innstillinger">
-    <button id="settingsToggle" class="btn" type="button" aria-label="Åpne innstillinger">⚙️ Innstillinger</button>
-    <div id="settingsPanel" class="settings-panel" hidden>
-      <div class="toggle" role="group" aria-label="Tema">
-        <button id="themeSystem" class="btn" type="button" aria-pressed="true" title="Følg system">System</button>
-        <button id="themeLight" class="btn" type="button" aria-pressed="false" title="Lyst">Lyst</button>
-        <button id="themeDark" class="btn" type="button" aria-pressed="false" title="Mørkt">Mørkt</button>
+  <button id="settingsToggle" class="settings-icon" type="button" aria-label="Åpne innstillinger">🪆</button>
+  <nav class="controlbar" aria-label="Hurtigkontroller" hidden>
+    <button id="btnSpeak" class="btn" type="button" aria-label="Spill av uttale">🔊 Les opp</button>
+    <!-- Removed 'Bland ord og tall' from controlbar -->
+  </nav>
+  <div id="settingsPanel" class="settings-panel" hidden>
+      <hr />
+      <div class="settings-group settings-readfirst" role="radiogroup" aria-label="Les først">
+  <span class="settings-title">Les først:</span>
+  <label class="readfirst-radio" title="Russisk"><input type="radio" name="readFirst" id="readFirstRu" value="ru" checked><img src="img/language/russia.png" alt="Russisk" class="flag-icon"></label>
+  <label class="readfirst-radio" title="Norsk"><input type="radio" name="readFirst" id="readFirstNo" value="no"><img src="img/language/norway.png" alt="Norsk" class="flag-icon"></label>
+      </div>
+      <div class="settings-group settings-func" role="group" aria-label="Funksjoner">
+        <label class="toggle" for="studyMode"><input id="studyMode" type="checkbox" role="switch" aria-checked="false" /> Studiemodus</label>
+        <label class="toggle" for="shuffleWords"><input id="shuffleWords" type="checkbox" role="switch" aria-checked="false" /> Bland ord og tall</label>
+      </div>
+      <div class="settings-group settings-voice" role="group" aria-label="Talevalg">
+        <label class="toggle" for="autoSpeak"><input id="autoSpeak" type="checkbox" role="switch" aria-checked="false" /> Auto-opplesning</label>
+        <div class="voice-selectors">
+          <label for="voiceSelect" class="voice-label">Russisk stemme:</label>
+          <select id="voiceSelect" class="voice" aria-label="Velg russisk stemme"></select>
+          <label for="voiceSelectNo" class="voice-label">Norsk stemme:</label>
+          <select id="voiceSelectNo" class="voice" aria-label="Velg norsk stemme"></select>
+        </div>
       </div>
       <hr />
-      <label class="toggle" for="autoSpeak"><input id="autoSpeak" type="checkbox" role="switch" aria-checked="false" /> Auto-opplesning</label>
-      <div class="voice-selectors">
-        <label for="voiceSelect">Russisk stemme:</label>
-        <select id="voiceSelect" class="voice" aria-label="Velg russisk stemme"></select>
-        <label for="voiceSelectNo">Norsk stemme:</label>
-        <select id="voiceSelectNo" class="voice" aria-label="Velg norsk stemme"></select>
+      <div class="settings-group settings-editor" role="group" aria-label="Editor og cache">
+        <button id="btnEditor" class="btn" type="button" aria-label="Åpne editor">✏️ Rediger</button>
+        <button id="btnClearCache" class="btn" type="button" aria-label="Slett cache og last nyeste">🗑️ Slett cache</button>
       </div>
-      <button id="btnEditor" class="btn" type="button" aria-label="Åpne editor">✏️ Rediger</button>
-      <button id="btnClearCache" class="btn" type="button" aria-label="Slett cache og last nyeste">🗑️ Slett cache</button>
-  <label class="toggle" for="shuffleWords"><input id="shuffleWords" type="checkbox" role="switch" aria-checked="false" /> Bland ord og tall</label>
+      <hr />
+      <div class="settings-group settings-theme" role="radiogroup" aria-label="Tema">
+        <label class="theme-radio" title="System"><input type="radio" name="theme" id="themeSystem" value="system"><span>📱</span></label>
+        <label class="theme-radio" title="Lyst"><input type="radio" name="theme" id="themeLight" value="light"><span>◻️</span></label>
+        <label class="theme-radio" title="Mørkt"><input type="radio" name="theme" id="themeDark" value="dark" checked><span>◼️</span></label>
+      </div>
+      <div class="settings-group settings-language" role="group" aria-label="Ordliste">
+        <label for="languageSelect" class="settings-title">Ordliste:</label>
+        <select id="languageSelect" class="language-select">
+          <option value="russisk">Russisk</option>
+          <option value="html">HTML</option>
+          <option value="tall">Russiske tall</option>
+          <option value="alfabet">Russisk alfabet</option>
+        </select>
+      </div>
     </div>
   </div>
   </nav>

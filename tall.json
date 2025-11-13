@@ -1,0 +1,13 @@
+[
+  {"ru": "ноль", "pron": "nol'", "no": "null", "en": "zero"},
+  {"ru": "один", "pron": "a-deen", "no": "en", "en": "one"},
+  {"ru": "два", "pron": "dva", "no": "to", "en": "two"},
+  {"ru": "три", "pron": "tree", "no": "tre", "en": "three"},
+  {"ru": "четыре", "pron": "che-ty-re", "no": "fire", "en": "four"},
+  {"ru": "пять", "pron": "pyat'", "no": "fem", "en": "five"},
+  {"ru": "шесть", "pron": "shest'", "no": "seks", "en": "six"},
+  {"ru": "семь", "pron": "syem'", "no": "sju", "en": "seven"},
+  {"ru": "восемь", "pron": "vo-syem'", "no": "åtte", "en": "eight"},
+  {"ru": "девять", "pron": "dyev-yat'", "no": "ni", "en": "nine"},
+  {"ru": "десять", "pron": "dye-syat'", "no": "ti", "en": "ten"}
+]

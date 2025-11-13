@@ -1,0 +1,12 @@
+[
+  {"html": "<h1>", "no": "Overskrift 1", "en": "Heading 1"},
+  {"html": "<p>", "no": "Avsnitt", "en": "Paragraph"},
+  {"html": "<a>", "no": "Lenke", "en": "Anchor/Link"},
+  {"html": "<img>", "no": "Bilde", "en": "Image"},
+  {"html": "<ul>", "no": "Uordnet liste", "en": "Unordered list"},
+  {"html": "<ol>", "no": "Ordnet liste", "en": "Ordered list"},
+  {"html": "<li>", "no": "Listeelement", "en": "List item"},
+  {"html": "<table>", "no": "Tabell", "en": "Table"},
+  {"html": "<tr>", "no": "Tabellrad", "en": "Table row"},
+  {"html": "<td>", "no": "Tabellcelle", "en": "Table cell"}
+]

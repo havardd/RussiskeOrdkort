@@ -1,3 +1,131 @@
+.card-img-front, .card-img-back {
+  display: none;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 0.5em;
+}
+.flag-icon {
+  width: 2em;
+  height: 2em;
+  vertical-align: middle;
+}
+.voice-label {
+  color: #0ea5e9;
+  font-weight: 700;
+  font-size: 1.05em;
+}
+.settings-group.settings-readfirst {
+  background: rgba(var(--card-tint), .95);
+  border-radius: 1em;
+  padding: 0.7em 1em;
+}
+.settings-title {
+  font-weight: bold;
+  margin-right: 1em;
+}
+.readfirst-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 1.5em;
+  margin-right: 1em;
+}
+.readfirst-radio input[type="radio"] {
+  accent-color: var(--accent, #0ea5e9);
+  width: 1.2em;
+  height: 1.2em;
+}
+.theme-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 1.5em;
+  margin-right: 1em;
+}
+.theme-radio input[type="radio"] {
+  accent-color: var(--accent, #0ea5e9);
+  width: 1.2em;
+  height: 1.2em;
+}
+/* Alltid rundt emoji-ikon øverst til høyre */
+.settings-icon {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 1001;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.settings-icon:hover {
+  background: var(--accent-2);
+}
+/* Skjul controlbar når hidden-attributt er satt */
+.controlbar[hidden] {
+  display: none !important;
+}
+/* Skjul panel når hidden */
+.settings-panel[hidden] {
+  display: none !important;
+}
+
+/* Vis panel som overlay når synlig */
+.settings-panel {
+  position: fixed;
+  top: 70px;
+  right: 18px;
+  z-index: 2000;
+  background: var(--bg, #fff);
+  color: var(--fg, #222);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  border-radius: 1em;
+  padding: 1.2em 1.2em 1em 1.2em;
+  min-width: 260px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+/* Horisontal gruppering av innstillinger */
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.settings-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+@media (min-width: 600px) {
+  .settings-panel {
+    flex-direction: column;
+  }
+  .settings-group {
+    flex-direction: row;
+    gap: 1.2rem;
+  }
+}
+@media (max-width: 599px) {
+  .settings-panel {
+    flex-direction: column;
+  }
+  .settings-group {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+}
 .norsk-front {
   margin-top: 0.5em;
   font-size: 1.2em;
@@ -31,9 +159,6 @@
   top: 10px;
   right: 10px;
   z-index: 1000;
-}
-/* Menu toggle button styling */
-#toggleMenu {
   background: var(--accent);
   color: #fff;
   border: none;
@@ -153,11 +278,11 @@ header p { margin:0; color:var(--muted); }
   opacity:0;
   transform:none;
 }
-.card.is-flipped .face-front {
+.card.flipped .face-front {
   visibility:hidden;
   opacity:0;
 }
-.card.is-flipped .face-back {
+.card.flipped .face-back {
   visibility:visible;
   opacity:1;
 }
@@ -256,3 +381,4 @@ table.words input { width:100%; padding:.5rem .6rem; border:1px solid var(--bord
 .row-actions button { min-height:40px; padding:.5rem .75rem; border-radius:10px; border:1px solid var(--border); }
 .editor-foot { padding:1rem; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:.5rem; }
 .close-btn { background:#ef4444; color:white; }
+

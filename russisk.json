@@ -1,5 +1,4 @@
-// russisk.js
-export const WORDS_RU = [
+[
   {"ru": "и", "pron": "i", "no": "og", "en": "and"},
   {"ru": "в", "pron": "v", "no": "i", "en": "in"},
   {"ru": "не", "pron": "nye", "no": "ikke", "en": "not"},
@@ -27,4 +26,4 @@ export const WORDS_RU = [
   {"ru": "который", "pron": "katoryj", "no": "som eller hvilken", "en": "which/that"},
   {"ru": "наш", "pron": "nash", "no": "vår", "en": "our"},
   {"ru": "только", "pron": "tol'ka", "no": "bare", "en": "only"}
-];
+]
