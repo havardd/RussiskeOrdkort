@@ -405,10 +405,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Studiemodus-innstilling
     const studyModeBox = document.getElementById('studyMode');
     const studyDelayInput = document.getElementById('studyDelay');
+    const wordDelayInput = document.getElementById('wordDelay');
     const studyRepeatInput = document.getElementById('studyRepeatCount');
     let studyModeActive = false;
     let studyRepeatCount = studyRepeatInput ? parseInt(studyRepeatInput.value, 10) : 3;
     let studyDelay = studyDelayInput ? parseFloat(studyDelayInput.value) : 0.8;
+    let wordDelay = wordDelayInput ? parseFloat(wordDelayInput.value) : 0.8;
     let studyCurrentRepeat = 0;
     let studyCurrentIndex = 0;
     let studyTimer = null;
@@ -422,6 +424,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (studyDelayInput) {
       studyDelayInput.addEventListener('input', function() {
         studyDelay = parseFloat(this.value) || 0.8;
+      });
+    }
+    if (wordDelayInput) {
+      wordDelayInput.addEventListener('input', function() {
+        wordDelay = parseFloat(this.value) || 0.8;
       });
     }
 
@@ -500,22 +507,26 @@ document.addEventListener('DOMContentLoaded', () => {
       if (readFirst === 'ru') {
         speakWord(w.ru, 'ru', function() {
           if (!studyModeActive) return;
-          speakWord(w.no, 'no', function() {
-            if (!studyModeActive) return;
-            studyTimer = setTimeout(function() {
-              if (studyModeActive) playStudyWord(w, repeat + 1);
-            }, studyDelay * 1000);
-          });
+          studyTimer = setTimeout(function() {
+            speakWord(w.no, 'no', function() {
+              if (!studyModeActive) return;
+              studyTimer = setTimeout(function() {
+                if (studyModeActive) playStudyWord(w, repeat + 1);
+              }, studyDelay * 1000);
+            });
+          }, wordDelay * 1000);
         });
       } else {
         speakWord(w.no, 'no', function() {
           if (!studyModeActive) return;
-          speakWord(w.ru, 'ru', function() {
-            if (!studyModeActive) return;
-            studyTimer = setTimeout(function() {
-              if (studyModeActive) playStudyWord(w, repeat + 1);
-            }, studyDelay * 1000);
-          });
+          studyTimer = setTimeout(function() {
+            speakWord(w.ru, 'ru', function() {
+              if (!studyModeActive) return;
+              studyTimer = setTimeout(function() {
+                if (studyModeActive) playStudyWord(w, repeat + 1);
+              }, studyDelay * 1000);
+            });
+          }, wordDelay * 1000);
         });
       }
     }
