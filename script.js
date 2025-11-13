@@ -335,9 +335,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.speakWord = function(text, lang, cb) {
-      if (!window.speechSynthesis || !text) { cb && cb(); return; }
+      if (!window.speechSynthesis || !text) { console.warn('Ingen talesyntese eller tekst'); cb && cb(); return; }
+      const voices = window.speechSynthesis.getVoices();
+      let selectedVoice = null;
+      let voiceName = null;
+      if (lang === 'ru') {
+        const voiceSelect = document.getElementById('voiceSelect');
+        voiceName = voiceSelect && voiceSelect.value;
+        selectedVoice = voices.find(v => v.name === voiceName && v.lang.startsWith('ru'));
+      } else {
+        const voiceSelectNo = document.getElementById('voiceSelectNo');
+        voiceName = voiceSelectNo && voiceSelectNo.value;
+        selectedVoice = voices.find(v => v.name === voiceName && (v.lang.startsWith('nb') || v.lang.startsWith('no')));
+      }
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = lang === 'ru' ? 'ru-RU' : 'nb-NO';
+      if (selectedVoice) {
+        utter.voice = selectedVoice;
+        console.log('Bruker valgt stemme:', selectedVoice.name, selectedVoice.lang);
+      } else {
+        console.warn('Fant ikke valgt stemme for', lang, 'Bruker standard:', utter.lang);
+      }
+      utter.onerror = function(e) { console.error('Talesyntese-feil:', e); };
       utter.onend = function() { cb && cb(); };
       window.speechSynthesis.speak(utter);
     }
