@@ -1,8 +1,34 @@
   // ...eksisterende kode...
 
-  // Etter setCard:
   // NB: wordIndex skal kun deklareres én gang her!
-  // Fjernet duplikat, behold kun én deklarasjon etter setCard
+  let wordIndex = 0;
+
+  // setCard må defineres før den brukes
+  const noEl = document.getElementById('no');
+  const enEl = document.getElementById('en');
+  const ru = document.getElementById('ru');
+  const pron = document.getElementById('pron');
+  function setCard(w){
+    ru.textContent = w.ru || '—';
+    pron.textContent = "uttale: " + (w.pron || '—');
+    // Hvis alfabet-språk, vis spesialfelt og bilder
+    if (currentLanguage === 'alfabet') {
+      norskFront.textContent = w.no || '—';
+      noEl.textContent = w.word ? (w.word + (w.pron ? ' [' + w.pron + ']': '')) : '—';
+      enEl.textContent = (w.word_no || '—') + (w.number ? ' | Tall: ' + w.number : '');
+      // Vis bilder hvis de finnes
+      if (w.img_front) {
+        imgFront.src = w.img_front;
+        imgFront.alt = w.word || '';
+        imgFront.style.display = '';
+      } else {
+        imgFront.src = '';
+        imgFront.style.display = 'none';
+      }
+    }
+    // ...resten av setCard...
+  }
+
   function showPrevCard() {
     const arr = LANGUAGES[currentLanguage] || [];
     if (!arr.length) return;
@@ -15,8 +41,6 @@
     wordIndex = (wordIndex + 1) % arr.length;
     setCard(arr[wordIndex]);
   }
-  let wordIndex = 0;
-  // ...eksisterende kode...
 
   // Flytt tastaturlisten hit, etter setCard er definert
   document.addEventListener('keydown', function(e) {
